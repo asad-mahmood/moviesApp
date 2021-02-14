@@ -13,6 +13,7 @@ st.set_page_config(page_title='Movie Explorer',
 st.title("Movie Explorer")
 st.subheader("The data used in this webapp is accquired from [The Open Movie Database.](http://www.omdbapi.com/)")
 st.write("The OMDb API is a RESTful web service to obtain movie information, all content and images on the site are contributed and maintained by our users.")
+st.write("**Made By: Asad Mahmood**")
 
 # Load data
 @st.cache
@@ -57,7 +58,7 @@ st.sidebar.header('Specify Filter Parameters')
 ######## Year
 
 st.sidebar.subheader('1) Select by Year')
-Year = st.sidebar.slider('Select a Range of Years', df.Year.min(), df.Year.max(), (df.Year.min(), df.Year.max()), 1)
+Year = st.sidebar.slider('Select a Range of Years', df.Year.min(), df.Year.max(), (df.Year.min(), df.Year.max()), 1.0)
 df = df[(df['Year'] >= Year[0]) & (df['Year'] <= Year[1])]
 
 ######### Genre
