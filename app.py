@@ -89,12 +89,12 @@ else:
 
 ######### IMDB
 st.sidebar.subheader('4) Select by IMDB Rating')
-imdb = st.sidebar.slider('Select a Range of IMDB Rating', df.imdbRating.min(), df.imdbRating.max(), (df.imdbRating.min(), df.imdbRating.max()), 0.1)
+imdb = st.sidebar.slider('Select a Range of IMDB Rating', float(df.imdbRating.min()), float(df.imdbRating.max()), (float(df.imdbRating.min()), float(df.imdbRating.max())), 0.1)
 df = df[(df['imdbRating'] >= imdb[0]) & (df['imdbRating'] <= imdb[1])]
 
 ######### Metacritic
 st.sidebar.subheader('5) Select by Metacritic Rating')
-mtcrtic = st.sidebar.slider('Select a Range of Metacritic Rating', df.Metacritic.min(), df.Metacritic.max(), (df.Metacritic.min(), df.Metacritic.max()), 0.1)
+mtcrtic = st.sidebar.slider('Select a Range of Metacritic Rating', float(df.Metacritic.min()), float(df.Metacritic.max()), (float(df.Metacritic.min()), float(df.Metacritic.max())), 0.1)
 df = df[(df['Metacritic'] >= mtcrtic[0]) & (df['Metacritic'] <= mtcrtic[1])]
 
 
