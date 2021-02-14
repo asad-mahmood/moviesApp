@@ -58,7 +58,7 @@ st.sidebar.header('Specify Filter Parameters')
 ######## Year
 
 st.sidebar.subheader('1) Select by Year')
-Year = st.sidebar.slider('Select a Range of Years', df.Year.min(), df.Year.max(), (int(df.Year.min()), int(df.Year.max())), 1.0)
+Year = st.sidebar.slider('Select a Range of Years', 1927, 2014, (1927, 2014), 1)
 df = df[(df['Year'] >= Year[0]) & (df['Year'] <= Year[1])]
 
 ######### Genre
