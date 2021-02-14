@@ -115,7 +115,8 @@ if tab == 'Overview of Project':
 
 elif tab == 'EDA':
     st.header("**Exploratory Data Analysis**")
-    pr = ProfileReport(df, explorative=True)
+    st.write("NOTE: The generated report here is set to minimal because this is a large dataset.")
+    pr = ProfileReport(df, minimal = True)
     st.subheader('Input DataFrame')
     st.write(df.head())
     st.write('---')
