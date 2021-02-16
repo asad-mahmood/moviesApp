@@ -13,7 +13,7 @@ st.set_page_config(page_title='Movie Explorer',
 st.title("Movie Explorer")
 st.subheader("The data used in this webapp is accquired from [The Open Movie Database.](http://www.omdbapi.com/)")
 st.write("The OMDb API is a RESTful web service to obtain movie information, all content and images on the site are contributed and maintained by our users.")
-st.write("**Made By: Asad Mahmood**")
+st.write("**Made By: [Asad Mahmood](https://www.linkedin.com/in/asadmahmoodmughal/)**")
 
 # Load data
 @st.cache
