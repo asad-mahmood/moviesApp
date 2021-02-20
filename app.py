@@ -13,7 +13,7 @@ st.set_page_config(page_title='Movie Explorer',
 st.title("Movie Explorer")
 st.subheader("The data used in this webapp is accquired from [The Open Movie Database.](http://www.omdbapi.com/)")
 st.write("The OMDb API is a RESTful web service to obtain movie information, all content and images on the site are contributed and maintained by our users.")
-st.write("**Made By: [Asad Mahmood](https://www.linkedin.com/in/asadmahmoodmughal/)**")
+st.write("**Made By: Asad Mahmood**")
 
 # Load data
 @st.cache
@@ -23,6 +23,20 @@ def load_data():
 
     # Copy of orginal dataframe
     oa = a
+
+    # Replacing less important categories with 'Others'
+    a['Rated'] = a['Rated'].replace(['12', '12A', '13', '14', \
+                                     '15', '15A', '18', '6', \
+                                     'AL', 'All', 'Atp', 'M', \
+                                     'MA15+', 'NC-17', 'TV-14', \
+                                     'TV-G', 'TV-MA', 'U', 'X'], 'Others')
+    # Replacing PG13 and TV-PG with 'PG-13' and 'PG' respectively
+    a['Rated'] = a['Rated'].replace(['PG13'], 'PG-13')
+    a['Rated'] = a['Rated'].replace(['TV-PG'], 'PG')
+
+    # Filling NaN values
+    a['Rated'] = a['Rated'].fillna('Not Rated')
+
     missingData = []
     for col in a.columns:
         missingData.append((col, round(100 * a[col].isnull().sum() / len(a), 2)))
@@ -34,6 +48,8 @@ def load_data():
         'plot_bgcolor': 'rgba(0, 0, 0, 0)',
         'paper_bgcolor': 'rgba(0, 0, 0, 0)',
     })
+
+
     a = a.dropna()
     a = a.reset_index(drop=True)
     a = a.assign(Genre=a['Genre'].str.split(', ')).explode('Genre')
@@ -58,7 +74,7 @@ st.sidebar.header('Specify Filter Parameters')
 ######## Year
 
 st.sidebar.subheader('1) Select by Year')
-Year = st.sidebar.slider('Select a Range of Years', 1927, 2014, (1927, 2014), 1)
+Year = st.sidebar.slider('Select a Range of Years', df.Year.min(), df.Year.max(), (int(df.Year.min()), int(df.Year.max())), 1)
 df = df[(df['Year'] >= Year[0]) & (df['Year'] <= Year[1])]
 
 ######### Genre
@@ -89,12 +105,12 @@ else:
 
 ######### IMDB
 st.sidebar.subheader('4) Select by IMDB Rating')
-imdb = st.sidebar.slider('Select a Range of IMDB Rating', float(df.imdbRating.min()), float(df.imdbRating.max()), (float(df.imdbRating.min()), float(df.imdbRating.max())), 0.1)
+imdb = st.sidebar.slider('Select a Range of IMDB Rating', df.imdbRating.min(), df.imdbRating.max(), (df.imdbRating.min(), df.imdbRating.max()), 0.1)
 df = df[(df['imdbRating'] >= imdb[0]) & (df['imdbRating'] <= imdb[1])]
 
 ######### Metacritic
 st.sidebar.subheader('5) Select by Metacritic Rating')
-mtcrtic = st.sidebar.slider('Select a Range of Metacritic Rating', float(df.Metacritic.min()), float(df.Metacritic.max()), (float(df.Metacritic.min()), float(df.Metacritic.max())), 0.1)
+mtcrtic = st.sidebar.slider('Select a Range of Metacritic Rating', df.Metacritic.min(), df.Metacritic.max(), (df.Metacritic.min(), df.Metacritic.max()), 0.1)
 df = df[(df['Metacritic'] >= mtcrtic[0]) & (df['Metacritic'] <= mtcrtic[1])]
 
 
@@ -108,14 +124,16 @@ if tab == 'Overview of Project':
     st.write(df.head())
     st.subheader("Data Cleaning and Preprocessing Steps")
     st.write("**1)** Loaded data from my [Github Repo]('https://raw.githubusercontent.com/asad-mahmood/moviesApp/main/all_movies.csv')\n")
-    st.write("**2)** Dropped all rows that had missing values so as to create more accurate plots. The missing value data percentages can be viewed below")
+    st.write("**2)** Relabeled data in 'Rated' column like '12', '12A', '13', '14' and so on as 'Others'. There were categories were very few in number so they were relabled.")
+    st.write("**3)** All movies that were 'NaN' in 'Rated' column were also labelled as 'Not Rated'.")
+    st.write("**4)** Checked missing value data percentages as they can be viewed below")
     st.plotly_chart(mfig)
-    st.write("**3)** The 'Genre' column string patterns are converted to single genre categories so as to have a more efficetive data visualizations.")
-    st.write("**4)** A copy of orginal dataframe was kept for visual exploration of columns that don't have any missing data.")
+    st.write("**5)** Removed missing values from data. Its a huge loss but it can't be avoided because 67% of boxoffice data is missing and can't be plugged with mean or mode")
+    st.write("**6)** The 'Genre' column string patterns are converted to single genre categories so as to have a more efficetive data visualizations.")
+    st.write("**7)** A copy of orginal dataframe was kept for visual exploration of columns that don't have any missing data.")
 
 elif tab == 'EDA':
     st.header("**Exploratory Data Analysis**")
-    st.write("NOTE: The generated report here is set to minimal because this is a large dataset.")
     pr = ProfileReport(df, minimal = True)
     st.subheader('Input DataFrame')
     st.write(df.head())
@@ -129,7 +147,14 @@ elif tab == 'Visual Exploration':
 
     with col1:
         st.subheader("1) Different Genre movies that won Oscars")
-        fig1 = px.pie(df, values='Oscars', names='Genre', title='Genres with a history of winning Oscar Awards')
+        d = df.groupby('Genre').count()['Oscars']
+        temp = pd.DataFrame({'Genre': d.keys(), 'Oscars': d.values})
+        temp = temp.sort_values(by='Oscars', ascending=False)
+        fig1 = px.bar(temp, y='Oscars', x='Genre', title='Genres with a history of winning Oscar Awards')
+        fig1.update_layout({
+            'plot_bgcolor': 'rgba(0, 0, 0, 0)',
+            'paper_bgcolor': 'rgba(0, 0, 0, 0)',
+        })
         st.plotly_chart(fig1)
 
     with col2:
@@ -143,19 +168,10 @@ elif tab == 'Visual Exploration':
         })
         st.plotly_chart(fig2)
 
-    st.subheader("2) Different Genre movies having different Runtime")
-    fig = px.bar(df, y='Oscars', x='Rated', color='Genre',
-                     title='Genres with a history of winning Oscar Awards',
-                     animation_frame="Year", hover_name = "Title",
-                     width = 1400, height = 500,
-                     range_y=[-1, 12])
-    fig.update_layout({
-        'plot_bgcolor': 'rgba(0, 0, 0, 0)',
-        'paper_bgcolor': 'rgba(0, 0, 0, 0)',
-    })
-    fig.layout.updatemenus[0].buttons[0].args[1]["frame"]["duration"] = 2000
+    st.subheader("2) Movies having from different genres and watch ratings got Oscars")
+    n = df.groupby(["Genre", "Rated"])['Oscars'].count().reset_index()
+    fig = px.treemap(n, path=["Genre", "Rated"], values='Oscars', width = 1400, height = 800)
     st.plotly_chart(fig)
-
 
 elif tab == 'Ratings10':
     st.header("**Rating 10 Tab**")
@@ -179,8 +195,3 @@ else:
         'paper_bgcolor': 'rgba(0, 0, 0, 0)',
     })
     st.plotly_chart(fig)
-
-
-#st.sidebar.subheader('3) Select by Rating')
-#Rating = st.sidebar.slider('Select Rating', df.Rating10.min(), df.Rating10.max(), (df.Rating10.min(), df.Rating10.max()), 0.1)
-#'Selected Year', Rating
